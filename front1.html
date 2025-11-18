@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chief Store Billing System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .menu {
+            background: #34495e;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .menu-item {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .menu-item:hover {
+            background: #c0392b;
+        }
+
+        .content {
+            padding: 20px;
+            min-height: 400px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            background: #219a52;
+        }
+
+        .btn-secondary {
+            background: #3498db;
+        }
+
+        .btn-secondary:hover {
+            background: #2980b9;
+        }
+
+        .invoice {
+            border: 2px solid #333;
+            padding: 20px;
+            margin: 20px 0;
+            background: #f9f9f9;
+        }
+
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .invoice-table th, .invoice-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .invoice-table th {
+            background: #34495e;
+            color: white;
+        }
+
+        .invoice-footer {
+            border-top: 2px solid #333;
+            padding-top: 10px;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .items-container {
+            margin: 20px 0;
+        }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: end;
+        }
+
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .search-results {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🧾 CHIEF STORE BILLING SYSTEM</h1>
+            <p>Professional Invoicing Solution</p>
+        </div>
+
+        <!-- Navigation Menu -->
+        <div class="menu">
+            <button class="menu-item" onclick="showSection('new-invoice')">1️⃣ Print New Invoice</button>
+            <button class="menu-item" onclick="showSection('search-invoice')">2️⃣ Refer Old Invoice</button>
+            <button class="menu-item" onclick="exitProgram()">3️⃣ Exit Program</button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <!-- New Invoice Section -->
+            <div id="new-invoice" class="section active">
+                <h2>Create New Invoice</h2>
+                <div class="form-group">
+                    <label for="customer-name">Customer Name:</label>
+                    <input type="text" id="customer-name" placeholder="Enter customer name">
+                </div>
+
+                <h3>Items</h3>
+                <div class="items-container" id="items-container">
+                    <div class="item-row">
+                        <div>
+                            <label>Item Name:</label>
+                            <input type="text" class="item-name" placeholder="Enter item name">
+                        </div>
+                        <div>
+                            <label>Quantity:</label>
+                            <input type="number" class="item-qty" value="1" min="1" step="0.1">
+                        </div>
+                        <div>
+                            <label>Price per Item (₹):</label>
+                            <input type="number" class="item-price" value="0" min="0" step="0.01">
+                        </div>
+                        <div>
+                            <label>Total (₹):</label>
+                            <input type="text" class="item-total" value="0.00" readonly>
+                        </div>
+                        <div>
+                            <button class="btn" onclick="removeItem(this)" style="display:none;">❌</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="addItem()">➕ Add Another Item</button>
+                
+                <div style="margin-top: 20px;">
+                    <button class="btn" onclick="generateInvoice()">💰 Generate Invoice</button>
+                    <button class="btn btn-secondary" onclick="clearForm()">🗑️ Clear Form</button>
+                </div>
+
+                <!-- Invoice Preview -->
+                <div id="invoice-preview" class="invoice" style="display: none;">
+                    <div class="invoice-header">
+                        <h2>CHIEF STORE INVOICE</h2>
+                    </div>
+                    
+                    <div class="form-group">
+                        <p><strong>Bill ID:</strong> <span id="preview-bill-id">-</span></p>
+                        <p><strong>Customer Name:</strong> <span id="preview-customer">-</span></p>
+                    </div>
+
+                    <table class="invoice-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="preview-items">
+                        </tbody>
+                    </table>
+
+                    <div class="invoice-footer">
+                        <p>Grand Total: ₹<span id="preview-grand-total">0.00</span></p>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 20px;">
+                        <p>Thank you for shopping with Chief Store!</p>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <button class="btn" onclick="sendEmail()">📧 Send via Email</button>
+                        <button class="btn btn-secondary" onclick="printInvoice()">🖨️ Print Invoice</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Invoice Section -->
+            <div id="search-invoice" class="section">
+                <h2>Search Invoices</h2>
+                <div class="form-group">
+                    <label for="search-customer">Enter customer name to search invoice:</label>
+                    <input type="text" id="search-customer" placeholder="Enter customer name">
+                </div>
+                <button class="btn" onclick="searchInvoices()">🔍 Search Invoices</button>
+
+                <div id="search-results" class="search-results">
+                    <!-- Search results will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentBillId = null;
+        let currentInvoiceData = null;
+
+        // Show/hide sections
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        // Add new item row
+        function addItem() {
+            const container = document.getElementById('items-container');
+            const newRow = document.createElement('div');
+            newRow.className = 'item-row';
+            newRow.innerHTML = `
+                <div>
+                    <label>Item Name:</label>
+                    <input type="text" class="item-name" placeholder="Enter item name">
+                </div>
+                <div>
+                    <label>Quantity:</label>
+                    <input type="number" class="item-qty" value="1" min="1" step="0.1" onchange="calculateTotal(this)">
+                </div>
+                <div>
+                    <label>Price per Item (₹):</label>
+                    <input type="number" class="item-price" value="0" min="0" step="0.01" onchange="calculateTotal(this)">
+                </div>
+                <div>
+                    <label>Total (₹):</label>
+                    <input type="text" class="item-total" value="0.00" readonly>
+                </div>
+                <div>
+                    <button class="btn" onclick="removeItem(this)">❌</button>
+                </div>
+            `;
+            container.appendChild(newRow);
+        }
+
+        // Remove item row
+        function removeItem(button) {
+            const row = button.closest('.item-row');
+            if (document.querySelectorAll('.item-row').length > 1) {
+                row.remove();
+            }
+        }
+
+        // Calculate item total
+        function calculateTotal(input) {
+            const row = input.closest('.item-row');
+            const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+            const price = parseFloat(row.querySelector('.item-price').value) || 0;
+            const total = qty * price;
+            row.querySelector('.item-total').value = total.toFixed(2);
+        }
+
+        // Clear form
+        function clearForm() {
+            document.getElementById('customer-name').value = '';
+            
+            // Clear all but first row
+            const container = document.getElementById('items-container');
+            const firstRow = container.querySelector('.item-row');
+            container.innerHTML = '';
+            container.appendChild(firstRow);
+            
+            // Reset first row
+            firstRow.querySelector('.item-name').value = '';
+            firstRow.querySelector('.item-qty').value = '1';
+            firstRow.querySelector('.item-price').value = '0';
+            firstRow.querySelector('.item-total').value = '0.00';
+            firstRow.querySelector('.btn').style.display = 'none';
+            
+            // Hide invoice preview
+            document.getElementById('invoice-preview').style.display = 'none';
+            
+            showMessage('Form cleared successfully!', 'success');
+        }
+
+        // Generate invoice
+        function generateInvoice() {
+            const customerName = document.getElementById('customer-name').value.trim();
+            
+            if (!customerName) {
+                showMessage('Please enter customer name!', 'error');
+                return;
+            }
+
+            // Collect items
+            const items = [];
+            let grandTotal = 0;
+            let hasValidItems = false;
+
+            document.querySelectorAll('.item-row').forEach(row => {
+                const name = row.querySelector('.item-name').value.trim();
+                const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+                const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                
+                if (name && qty > 0 && price > 0) {
+                    const total = qty * price;
+                    items.push({
+                        name: name,
+                        quantity: qty,
+                        price: price,
+                        total: total
+                    });
+                    grandTotal += total;
+                    hasValidItems = true;
+                }
+            });
+
+            if (!hasValidItems) {
+                showMessage('Please add at least one valid item!', 'error');
+                return;
+            }
+
+            // Generate bill ID (simulate database auto-increment)
+            currentBillId = Math.floor(1000 + Math.random() * 9000);
+            currentInvoiceData = {
+                billId: currentBillId,
+                customerName: customerName,
+                items: items,
+                grandTotal: grandTotal
+            };
+
+            // Display invoice preview
+            document.getElementById('preview-bill-id').textContent = currentBillId;
+            document.getElementById('preview-customer').textContent = customerName;
+            document.getElementById('preview-grand-total').textContent = grandTotal.toFixed(2);
+
+            const itemsTable = document.getElementById('preview-items');
+            itemsTable.innerHTML = '';
+            
+            items.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${item.quantity}</td>
+                    <td>₹${item.price.toFixed(2)}</td>
+                    <td>₹${item.total.toFixed(2)}</td>
+                `;
+                itemsTable.appendChild(row);
+            });
+
+            document.getElementById('invoice-preview').style.display = 'block';
+            showMessage('Invoice generated successfully! Bill ID: ' + currentBillId, 'success');
+        }
+
+        // Search invoices
+        function searchInvoices() {
+            const customerName = document.getElementById('search-customer').value.trim();
+            
+            if (!customerName) {
+                showMessage('Please enter customer name to search!', 'error');
+                return;
+            }
+
+            // Simulate database search - in real implementation, this would call your Python backend
+            const resultsDiv = document.getElementById('search-results');
+            resultsDiv.innerHTML = '<div class="message">Searching for invoices... (Backend integration required)</div>';
+            
+            // Simulate API delay
+            setTimeout(() => {
+                // Mock data - replace with actual API call to your Python backend
+                const mockInvoices = [
+                    {
+                        billId: 1001,
+                        customerName: customerName,
+                        totalAmount: 1250.00,
+                        items: [
+                            { name: 'Product A', quantity: 2, price: 500, total: 1000 },
+                            { name: 'Product B', quantity: 1, price: 250, total: 250 }
+                        ]
+                    },
+                    {
+                        billId: 1002,
+                        customerName: customerName,
+                        totalAmount: 850.50,
+                        items: [
+                            { name: 'Product C', quantity: 3, price: 283.50, total: 850.50 }
+                        ]
+                    }
+                ];
+
+                if (mockInvoices.length === 0) {
+                    resultsDiv.innerHTML = `<div class="message error">No invoice found for customer '${customerName}'.</div>`;
+                    return;
+                }
+
+                let html = `<div class="message success">Found ${mockInvoices.length} invoice(s) for '${customerName}'</div>`;
+                
+                mockInvoices.forEach(invoice => {
+                    html += `
+                        <div class="invoice">
+                            <div class="invoice-header">
+                                <h2>CHIEF STORE INVOICE</h2>
+                            </div>
+                            <p><strong>Bill ID:</strong> ${invoice.billId}</p>
+                            <p><strong>Customer Name:</strong> ${invoice.customerName}</p>
+                            
+                            <table class="invoice-table">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Qty</th>
+                                        <th>Price</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+                    
+                    invoice.items.forEach(item => {
+                        html += `
+                            <tr>
+                                <td>${item.name}</td>
+                                <td>${item.quantity}</td>
+                                <td>₹${item.price.toFixed(2)}</td>
+                                <td>₹${item.total.toFixed(2)}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += `
+                                </tbody>
+                            </table>
+                            <div class="invoice-footer">
+                                <p>Grand Total: ₹${invoice.totalAmount.toFixed(2)}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                resultsDiv.innerHTML = html;
+            }, 1000);
+        }
+
+        // Send email
+        function sendEmail() {
+            if (!currentInvoiceData) {
+                showMessage('Please generate an invoice first!', 'error');
+                return;
+            }
+
+            const email = prompt('Enter customer email address:');
+            if (email) {
+                // Simulate email sending - in real implementation, this would call your Python backend
+                showMessage(`Invoice sent to ${email} successfully! (Backend integration required)`, 'success');
+            }
+        }
+
+        // Print invoice
+        function printInvoice() {
+            window.print();
+        }
+
+        // Exit program
+        function exitProgram() {
+            if (confirm('Are you sure you want to exit Chief Store Billing System?')) {
+                showMessage('👋 Exiting Chief Store Billing System... Goodbye!', 'success');
+                // In a real app, you might want to close the window or redirect
+            }
+        }
+
+        // Show message
+        function showMessage(message, type) {
+            // Create message element
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            
+            // Add to top of content
+            const content = document.querySelector('.content');
+            content.insertBefore(messageDiv, content.firstChild);
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listeners to first row inputs
+            const firstRow = document.querySelector('.item-row');
+            firstRow.querySelector('.item-qty').addEventListener('change', function() {
+                calculateTotal(this);
+            });
+            firstRow.querySelector('.item-price').addEventListener('change', function() {
+                calculateTotal(this);
+            });
+        });
+    </script>
+</body>
+</html>
